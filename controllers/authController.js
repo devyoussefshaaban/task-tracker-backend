@@ -41,16 +41,9 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
-    await Yup.string().email()
-      .label("Email")
-      .required()
-      .validate(email);
-      await Yup.string()
-      .label("Password")
-      .required()
-      .min(6)
-      .validate(password);
+
+    await Yup.string().email().label("Email").required().validate(email);
+    await Yup.string().label("Password").required().min(6).validate(password);
 
     const user = await User.findOne({ email });
     if (!user) throw new Error("User not found, try sign up.");
@@ -71,7 +64,14 @@ export const loginUser = async (req, res) => {
 export const getMe = async (req, res) => {
   try {
     const { user } = req;
-    res.status(200).json({ success: true, data: user });
+    const { username, email } = user;
+    res.status(200).json({
+      success: true,
+      data: {
+        username,
+        email,
+      },
+    });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
