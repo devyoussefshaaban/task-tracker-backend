@@ -1,5 +1,6 @@
 import User from "../models/userModel.js";
 import jwt from "jsonwebtoken";
+import { USER_ROLE } from "../utils/constants.js";
 
 export const auth = async (req, res, next) => {
   let token;
@@ -22,9 +23,21 @@ export const auth = async (req, res, next) => {
       }
     } else {
       res.status(403);
-      throw new Error("Not authorized, not token.");
+      throw new Error("Not authorized, no token.");
     }
   } catch (error) {
     res.status(403).json({ success: false, message: error.message });
   }
 };
+
+export const admin = (req, res, next) => {
+  try {
+    const {user} = req
+    if(user.role !== USER_ROLE.ADMIN) 
+      throw new Error("You're not an admin, you're not permitted to manage in this area.")
+
+    next()
+  } catch (error) {
+    res.status(403).json({ success: false, message: error.message });
+  }
+}

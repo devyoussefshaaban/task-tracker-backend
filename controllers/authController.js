@@ -92,7 +92,7 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
 
     username ? user.$set("username", username) : null;
     email ? user.$set("email", email) : null;
-    password ? user.$set("password", password) : null;
+    password ? user.$set("password", await bcrypt.hash(password, 10)) : null;
 
     await user.save();
 
