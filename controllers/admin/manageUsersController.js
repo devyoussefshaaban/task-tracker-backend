@@ -11,9 +11,8 @@ export const deleteUser = asyncHandler(async(req, res) => {
         if(!user) throw new Error("User not found.")
 
         await Task.deleteMany({userId})
+        .then(async () => await User.deleteOne({_id: userId}))
         
-        setTimeout(async () => await User.deleteOne({_id: userId}), 1000)
-
         res.status(201).json({success: true, message: "User has been deleted successfully."})
     } catch (error) {
         res.status(400).json({success: false, message: error.message})

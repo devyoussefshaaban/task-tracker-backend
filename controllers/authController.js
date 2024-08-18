@@ -69,12 +69,13 @@ export const loginUser = asyncHandler(async (req, res) => {
 export const getMe = asyncHandler(async (req, res) => {
   try {
     const { user } = req;
-    const { username, email } = user;
+    const { username, email, role } = user;
     res.status(200).json({
       success: true,
       data: {
         username,
         email,
+        role
       },
     });
   } catch (error) {
