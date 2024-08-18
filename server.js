@@ -13,8 +13,8 @@ const app = express();
 app.use(express.json())
 app.use(cors())
 
-app.use("/api/auth", authRouter)
-app.use("/api/tasks", tasksRouter)
+app.use("/api/v1/auth", authRouter)
+app.use("/api/v1/tasks", tasksRouter)
 
 const PORT = process.env.PORT || 4444
 app.listen(PORT, () => console.log(`Server is running on port: ${PORT}`))
