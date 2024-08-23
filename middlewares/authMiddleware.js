@@ -32,12 +32,28 @@ export const auth = async (req, res, next) => {
 
 export const admin = (req, res, next) => {
   try {
-    const {user} = req
-    if(user.role !== USER_ROLE.ADMIN) 
-      throw new Error("You're not an admin, you're not permitted to manage in this area.")
+    const { user } = req;
+    if (user.role !== USER_ROLE.ADMIN && user.role !== USER_ROLE.OWNER)
+      throw new Error(
+        "You're not an admin, you're not permitted to manage in this area."
+      );
 
-    next()
+    next();
   } catch (error) {
     res.status(403).json({ success: false, message: error.message });
   }
-}
+};
+
+export const owner = (req, res, next) => {
+  try {
+    const { user } = req;
+    if (user.role !== USER_ROLE.OWNER)
+      throw new Error(
+        "You're not an owner, you're not permitted to manage in this area."
+      );
+
+    next();
+  } catch (error) {
+    res.status(403).json({ success: false, message: error.message });
+  }
+};

@@ -38,7 +38,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 
     await verificationToken.save();
 
-    const verificationUrl = `${process.env.BASE_URL}/api/v1/auth/users/${newUser._id}/verify/${verificationToken.token}`;
+    const verificationUrl = `${process.env.BASE_URL}/auth/users/${newUser._id}/verify/${verificationToken.token}`;
 
     await sendEmail(
       newUser.email,
@@ -81,7 +81,7 @@ export const loginUser = asyncHandler(async (req, res) => {
 
         await newVerificationToken.save();
 
-        const verificationUrl = `${process.env.BASE_URL}/api/v1/auth/users/${user._id}/verify/${newVerificationToken.token}`;
+        const verificationUrl = `${process.env.BASE_URL}/auth/users/${user._id}/verify/${newVerificationToken.token}`;
 
         await sendEmail(
           user.email,
