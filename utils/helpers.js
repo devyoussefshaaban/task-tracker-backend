@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
+import { Schema } from "mongoose";
 
 export const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET_KEY, { expiresIn: "1d" });
@@ -30,4 +31,21 @@ export const sendEmail = async (email, subject, text) => {
     console.log(`Email not sent, an ERROR occured: ${error}`);
     return error;
   }
+};
+
+export const StringType = (minLength, maxLength, isUnique, isRequired) => {
+  return {
+    type: String,
+    required: isRequired,
+    minLength,
+    maxLength,
+    unique: isUnique,
+  };
+};
+
+export const modelRefType = (ref) => {
+  return {
+    type: Schema.ObjectId,
+    ref,
+  };
 };

@@ -6,6 +6,7 @@ import authRouter from "./routes/authRouter.js";
 import tasksRouter from "./routes/tasksRouter.js";
 import manageUsersRouter from "./routes/admin/manageUsersRouter.js";
 import manageInGeneralRouter from "./routes/owner/manageInGeneralRouter.js";
+import groupRouter from "./routes/groupRouter.js";
 import { admin, auth, owner } from "./middlewares/authMiddleware.js";
 
 config();
@@ -18,6 +19,7 @@ app.use(cors());
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/tasks", tasksRouter);
+app.use("/api/v1/groups", auth, groupRouter);
 app.use("/api/v1/manage", auth, admin, manageUsersRouter);
 app.use("/api/v1/manage/general", auth, owner, manageInGeneralRouter);
 

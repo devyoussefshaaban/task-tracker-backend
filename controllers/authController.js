@@ -5,6 +5,7 @@ import Yup from "yup";
 import asyncHandler from "express-async-handler";
 import Token from "../models/tokenModel.js";
 import crypto from "crypto";
+import multer from "multer";
 
 export const registerUser = asyncHandler(async (req, res) => {
   try {
@@ -29,6 +30,7 @@ export const registerUser = asyncHandler(async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      avatar: null,
     });
 
     const verificationToken = await Token.create({
@@ -90,9 +92,7 @@ export const loginUser = asyncHandler(async (req, res) => {
         );
       }
 
-      throw new Error(
-        "You're account is not verified, kindly check out your mail inbox and click the link we sent to verify your account."
-      );
+      throw new Error("Kindly check your email and verify your account.");
     }
 
     res.status(201).json({
@@ -101,6 +101,7 @@ export const loginUser = asyncHandler(async (req, res) => {
       data: {
         username: user.username,
         email: user.email,
+        avatar: user.avatar,
         token: user.token,
       },
     });
@@ -130,8 +131,10 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
   try {
     const {
       user,
-      body: { username, email, password },
+      body: { username, email, password, avatar },
     } = req;
+
+    console.log({ body: req.body });
 
     await Yup.string().label("Username").validate(username);
     await Yup.string().email().label("Email").validate(email);
@@ -139,6 +142,7 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
 
     username ? user.$set("username", username) : null;
     email ? user.$set("email", email) : null;
+    avatar ? user.$set("avatar", avatar) : null;
     password ? user.$set("password", await bcrypt.hash(password, 10)) : null;
 
     await user.save();
@@ -149,6 +153,7 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
       data: {
         username: user.username,
         email: user.email,
+        avatar: user.avatar,
       },
     });
   } catch (error) {
