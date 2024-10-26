@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import Group from "../models/groupModel.js";
+import GroupMember from "../models/group_member.js";
 import Yup from "yup";
 
 export const createNewGroup = asyncHandler(async (req, res) => {
@@ -41,11 +42,37 @@ export const createNewGroup = asyncHandler(async (req, res) => {
       description,
     });
 
+    await GroupMember.create({
+      userData: {
+        userId: user._id,
+        username: user.username,
+        email: user.email,
+      },
+      groupData: {
+        groupId: newGroup._id,
+        groupName: newGroup.groupName,
+        description: newGroup.description,
+      },
+    });
+
     res.status(201).json({
       success: true,
       message: "New Group Created Successfully.",
       data: newGroup,
     });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+export const getMyGroups = asyncHandler(async (req, res) => {
+  try {
+    const { user } = req;
+    const groupList = await GroupMember.find().where(
+      "userData.userId",
+      user._id
+    );
+    res.status(200).json({ success: true, data: groupList });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }

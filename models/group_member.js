@@ -1,15 +1,18 @@
 import { Schema, model } from "mongoose";
-import { modelRefType } from "../utils/helpers";
+import { modelRefType } from "../utils/helpers.js";
 
-const groupMemberSchema = new Schema(
-  {
+const groupMemberSchema = new Schema({
+  userData: {
     userId: modelRefType("User"),
-    groupId: modelRefType("Group"),
+    username: String,
+    email: String,
   },
-  {
-    timestamps: true,
-  }
-);
+  groupData: {
+    groupId: modelRefType("Group"),
+    groupName: String,
+    description: String,
+  },
+});
 
 const GroupMember = model("GroupMember", groupMemberSchema);
 export default GroupMember;
