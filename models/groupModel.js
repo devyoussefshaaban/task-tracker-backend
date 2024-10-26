@@ -7,7 +7,7 @@ const groupSchema = new Schema(
       type: Schema.ObjectId,
       ref: "User",
     },
-    groupName: StringType(3, 30, true, true),
+    groupName: StringType(3, 30, false, true),
     description: StringType(10, 300, false, false),
   },
   {

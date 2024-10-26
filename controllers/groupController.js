@@ -77,3 +77,39 @@ export const getMyGroups = asyncHandler(async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 });
+
+export const getGroupById = asyncHandler(async (req, res) => {
+  try {
+    const {
+      params: { groupId },
+    } = req;
+    const group = await Group.findById(groupId);
+    if (!group) {
+      res.status(404);
+      throw new Error("Group not found.");
+    }
+    res.status(200).json({ success: true, data: group });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+export const editGroup = asyncHandler(async (req, res) => {
+  try {
+    const {
+      group,
+      body: { groupName, description },
+      params: { groupId },
+    } = req;
+    group.$set("groupName", groupName ? groupName : group.groupName);
+    group.$set("description", description ? description : group.description);
+    await group.save();
+    res.status(201).json({
+      success: true,
+      message: "Group is updated successfully.",
+      data: group,
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});

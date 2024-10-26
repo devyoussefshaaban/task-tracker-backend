@@ -134,8 +134,6 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
       body: { username, email, password, avatar },
     } = req;
 
-    console.log({ body: req.body });
-
     await Yup.string().label("Username").validate(username);
     await Yup.string().email().label("Email").validate(email);
     await Yup.string().label("Password").min(6).validate(password);
