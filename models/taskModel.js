@@ -1,31 +1,48 @@
-import {Schema, model} from 'mongoose'
-import { TASK_STATUS } from '../utils/constants.js'
+import { Schema, model } from "mongoose";
+import { TASK_PRIORITY, TASK_STATUS } from "../utils/constants.js";
 
-const taskSchema = new Schema({
-    name:{
-        type: String,
-        required: true,
-        minLength: 3,
-        maxLength: 30,
-        unique: true
+const taskSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      minLength: 3,
+      maxLength: 30,
+      unique: true,
     },
-    description:{
-        type: String,
-        required: true,
-        minLength: 10,
-        maxLength: 300,
+    description: {
+      type: String,
+      required: true,
+      minLength: 10,
+      maxLength: 300,
     },
-    status:{
-        type: String,
-        default: TASK_STATUS.NOT_STARTED
+    startDate: {
+      type: Date,
+      default: Date.now(),
     },
-    userId:{
-        type: Schema.Types.ObjectId,
-        ref: "User"
-    }
-}, {
-    timestamps: true
-})
+    // NOTE: END-DATE IS REQUIRED AND SHOULD BE UPDATED IN THIS MODEL
+    endDate: {
+      type: Date,
+      default: Date.now(),
+    },
+    priority: {
+      type: String,
+      required: true,
+      default: TASK_PRIORITY.NORMAL,
+    },
+    status: {
+      type: String,
+      default: TASK_STATUS.NOT_STARTED,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-const Task = model("Task", taskSchema)
-export default Task
+const Task = model("Task", taskSchema);
+export default Task;

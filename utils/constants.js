@@ -9,3 +9,9 @@ export const USER_ROLE = {
   ADMIN: "ADMIN",
   OWNER: "OWNER",
 };
+
+export const TASK_PRIORITY = {
+  URGENT: "URGENT",
+  NORMAL: "NORMAL",
+  LOW: "LOW",
+};

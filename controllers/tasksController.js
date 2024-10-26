@@ -15,7 +15,7 @@ export const createTask = async (req, res) => {
   try {
     const {
       user,
-      body: { name, description, status },
+      body: { name, description, startDate, endDate, priority, status },
     } = req;
 
     await Yup.string()
@@ -40,6 +40,9 @@ export const createTask = async (req, res) => {
     const newTask = await Task.create({
       name,
       description,
+      startDate,
+      endDate,
+      priority,
       status,
       userId: user._id,
     });
