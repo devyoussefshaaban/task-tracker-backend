@@ -15,3 +15,9 @@ export const TASK_PRIORITY = {
   NORMAL: "NORMAL",
   LOW: "LOW",
 };
+
+export const INVITATION_STATUS = {
+  PENDING: "PENDING",
+  REJECTED: "REJECTED",
+  ACCEPTED: "ACCEPTED",
+};

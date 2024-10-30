@@ -7,7 +7,9 @@ import tasksRouter from "./routes/tasksRouter.js";
 import manageUsersRouter from "./routes/admin/manageUsersRouter.js";
 import manageInGeneralRouter from "./routes/owner/manageInGeneralRouter.js";
 import groupRouter from "./routes/groupRouter.js";
+import projectRouter from "./routes/projectsRouter.js";
 import { admin, auth, owner } from "./middlewares/authMiddleware.js";
+import { getMyInvitations } from "./controllers/projectController.js";
 
 config();
 connectDB();
@@ -20,6 +22,8 @@ app.use(cors());
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/tasks", tasksRouter);
 app.use("/api/v1/groups", auth, groupRouter);
+app.get("/api/v1/my-invitations", auth, getMyInvitations);
+app.use("/api/v1/manage/groups", auth, projectRouter);
 app.use("/api/v1/manage", auth, admin, manageUsersRouter);
 app.use("/api/v1/manage/general", auth, owner, manageInGeneralRouter);
 

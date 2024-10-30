@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import { TASK_PRIORITY, TASK_STATUS } from "../utils/constants.js";
+import { modelRefType } from "../utils/helpers.js";
 
 const taskSchema = new Schema(
   {
@@ -16,6 +17,7 @@ const taskSchema = new Schema(
       minLength: 10,
       maxLength: 300,
     },
+    projectId: modelRefType("Project"),
     startDate: {
       type: Date,
       default: Date.now(),
