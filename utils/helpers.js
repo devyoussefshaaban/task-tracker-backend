@@ -40,6 +40,14 @@ export const StringType = (minLength, maxLength, isUnique, isRequired) => {
   };
 };
 
+export const EmailType = (isUnique) => {
+  return {
+    type: String,
+    required: true,
+    unique: isUnique,
+  };
+};
+
 export const modelRefType = (ref) => {
   return {
     type: Schema.ObjectId,

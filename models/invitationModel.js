@@ -1,11 +1,22 @@
 import { Schema, model } from "mongoose";
-import { modelRefType, StringType } from "../utils/helpers.js";
+import { EmailType, modelRefType, StringType } from "../utils/helpers.js";
 import { INVITATION_STATUS } from "../utils/constants.js";
 
+const invitationEnd = {
+  name: {
+    type: String,
+    required: false,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+};
+
 const invitationSchema = new Schema({
-  senderId: modelRefType("User"),
-  recieverId: modelRefType("User"),
-  projectId: modelRefType("Project"),
+  sender: invitationEnd,
+  reciever: invitationEnd,
+  groupId: modelRefType("Group"),
   message: StringType(10, 300, false, true),
   status: {
     type: String,
@@ -13,5 +24,5 @@ const invitationSchema = new Schema({
   },
 });
 
-const Invitaion = model("Invitation", invitationSchema);
-export default Invitaion;
+const Invitation = model("Invitation", invitationSchema);
+export default Invitation;
