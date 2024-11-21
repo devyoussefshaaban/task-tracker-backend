@@ -17,6 +17,7 @@ const invitationSchema = new Schema({
   sender: invitationEnd,
   reciever: invitationEnd,
   groupId: modelRefType("Group"),
+  title: StringType(3, 30, false, true),
   message: StringType(10, 300, false, true),
   status: {
     type: String,

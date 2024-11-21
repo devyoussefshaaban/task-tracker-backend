@@ -2,6 +2,7 @@ import Invitation from "../models/invitationModel.js";
 import asyncHandler from "express-async-handler";
 import { sendEmail } from "../utils/helpers.js";
 import { INVITATION_STATUS } from "../utils/constants.js";
+import Group from "../models/groupModel.js";
 import User from "../models/userModel.js";
 
 export const getMyInvitations = asyncHandler(async (req, res) => {
@@ -33,16 +34,37 @@ export const getMyInvitations = asyncHandler(async (req, res) => {
   }
 });
 
+export const getInvitationInfo = asyncHandler(async (req, res) => {
+  try {
+    const {
+      params: { invitationId },
+    } = req;
+    const invitation = await Invitation.findById(invitationId);
+    if (!invitation) {
+      res.status(404);
+      throw new Error("Invitation not found.");
+    }
+    const group = await Group.findById(invitation.groupId);
+    if (!group) {
+      res.status(404);
+      throw new Error("Group not found.");
+    }
+    res.status(200).json({ success: true, data: { ...invitation, group } });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
 export const inviteGroupMember = asyncHandler(async (req, res) => {
   try {
     const {
       user,
       group,
-      body: { recieverEmail, message },
+      body: { recieverEmail, title, message },
       params: { groupId },
     } = req;
 
-    if (!recieverEmail || !message)
+    if (!recieverEmail || !title || !message)
       throw new Error("All fields are required, kindly fill them all.");
 
     console.log({ recieverEmail });
@@ -81,6 +103,7 @@ export const inviteGroupMember = asyncHandler(async (req, res) => {
           email: recieverEmail,
         },
         groupId,
+        title,
         message,
       });
 
@@ -104,6 +127,7 @@ export const inviteGroupMember = asyncHandler(async (req, res) => {
         email: recieverEmail,
       },
       groupId,
+      title,
       message,
     });
 
@@ -130,7 +154,7 @@ export const acceptInvitation = asyncHandler(async (req, res) => {
     }
     if (invitation.status !== INVITATION_STATUS.PENDING)
       throw new Error(`Invitation already ${invitation.status}`);
-    if (invitation.recieverId.toString() !== user._id.toString()) {
+    if (invitation.reciever.email !== user.email) {
       res.status(403);
       throw new Error(
         "This invitation is not for you, you're not permitted to this action"

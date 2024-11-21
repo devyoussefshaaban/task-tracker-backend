@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   acceptInvitation,
+  getInvitationInfo,
   getMyInvitations,
   inviteGroupMember,
   rejectInvitation,
@@ -10,8 +11,9 @@ import { isGroupAdmin } from "../middlewares/projectMiddleware.js";
 const router = Router();
 
 router.get("/", getMyInvitations);
+router.get("/:invitationId", getInvitationInfo);
 router.post("/groups/:groupId/invite", isGroupAdmin, inviteGroupMember);
-router.get(
+router.post(
   "/groups/:groupId/invitations/:invitationId/accept",
   acceptInvitation
 );
