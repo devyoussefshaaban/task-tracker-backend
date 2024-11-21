@@ -44,12 +44,7 @@ export const getInvitationInfo = asyncHandler(async (req, res) => {
       res.status(404);
       throw new Error("Invitation not found.");
     }
-    const group = await Group.findById(invitation.groupId);
-    if (!group) {
-      res.status(404);
-      throw new Error("Group not found.");
-    }
-    res.status(200).json({ success: true, data: { ...invitation, group } });
+    res.status(200).json({ success: true, data: invitation });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
