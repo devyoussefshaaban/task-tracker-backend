@@ -4,6 +4,7 @@ import { sendEmail } from "../utils/helpers.js";
 import { INVITATION_STATUS } from "../utils/constants.js";
 import Group from "../models/groupModel.js";
 import User from "../models/userModel.js";
+import GroupMember from "../models/group_member.js";
 
 export const getMyInvitations = asyncHandler(async (req, res) => {
   try {
@@ -152,6 +153,26 @@ export const acceptInvitation = asyncHandler(async (req, res) => {
     }
     invitation.$set("status", INVITATION_STATUS.ACCEPTED);
     await invitation.save();
+
+    const group = await Group.findById(invitation.groupId);
+    if (!group) {
+      res.status(404);
+      throw new Error("Group not found.");
+    }
+
+    await GroupMember.create({
+      userData: {
+        userId: user._id,
+        username: user.username,
+        email: user.email,
+      },
+      groupData: {
+        groupId: group._id,
+        groupName: group.groupName,
+        description: group.description,
+      },
+    });
+
     res.status(201).json({
       success: true,
       message: "Invitation accepted successfully.",
