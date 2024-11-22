@@ -28,4 +28,4 @@ app.use("/api/v1/manage", auth, admin, manageUsersRouter);
 app.use("/api/v1/manage/general", auth, owner, manageInGeneralRouter);
 
 const PORT = process.env.PORT || 4444;
-app.listen(PORT, () => console.log(`Server is running on port: ${PORT}`));
+app.listen(PORT);

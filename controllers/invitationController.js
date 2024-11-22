@@ -24,8 +24,6 @@ export const getMyInvitations = asyncHandler(async (req, res) => {
     const recievedInvitations = (await Invitation.find()).filter(
       (invitation) => invitation.reciever.email === user.email
     );
-
-    console.log("SENTT");
     res
       .status(200)
       .json({ success: true, data: { sentInvitations, recievedInvitations } });
@@ -61,8 +59,6 @@ export const inviteGroupMember = asyncHandler(async (req, res) => {
 
     if (!recieverEmail || !title || !message)
       throw new Error("All fields are required, kindly fill them all.");
-
-    console.log({ recieverEmail });
 
     // TODO: Fix bug of this filter, the recieverEmail is not defined err.
     // const invitation = await Invitation.findOne({
@@ -103,7 +99,6 @@ export const inviteGroupMember = asyncHandler(async (req, res) => {
       });
 
       const invitationUrl = `${process.env.BASE_URL}/invitations/groups/${groupId}/invitationList/${newInvitation._id}`;
-      console.log(invitationUrl);
 
       await sendEmail(
         recieverEmail,
