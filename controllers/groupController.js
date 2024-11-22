@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import Group from "../models/groupModel.js";
 import GroupMember from "../models/group_member.js";
 import Yup from "yup";
+import Project from "../models/projectModel.js";
 
 export const createNewGroup = asyncHandler(async (req, res) => {
   try {
@@ -83,12 +84,16 @@ export const getGroupById = asyncHandler(async (req, res) => {
     const {
       params: { groupId },
     } = req;
+
     const group = await Group.findById(groupId);
     if (!group) {
       res.status(404);
       throw new Error("Group not found.");
     }
-    res.status(200).json({ success: true, data: group });
+
+    const projects = await Project.find({ groupId: group._id });
+
+    res.status(200).json({ success: true, data: { group, projects } });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
