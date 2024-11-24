@@ -1,10 +1,15 @@
 import Task from "../models/taskModel.js";
+import User from "../models/userModel.js";
 import Yup from "yup";
 
 export const getMyTasks = async (req, res) => {
   try {
     const { user } = req;
-    const tasks = await Task.find({ userId: user._id });
+    const tasks = await Task.find().where(
+      "creator.userId",
+      user._id && "assignee.userId",
+      user._id
+    );
     res.status(200).json({ success: true, data: tasks });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -15,15 +20,23 @@ export const createTask = async (req, res) => {
   try {
     const {
       user,
-      body: { name, description, startDate, endDate, priority, status },
+      body: {
+        title,
+        description,
+        startDate,
+        endDate,
+        priority,
+        status,
+        assignedUserId,
+      },
     } = req;
 
     await Yup.string()
-      .label("Task name")
+      .label("Task title")
       .required()
       .min(3)
       .max(30)
-      .validate(name);
+      .validate(title);
     await Yup.string()
       .label("Description")
       .required()
@@ -31,21 +44,51 @@ export const createTask = async (req, res) => {
       .max(300)
       .validate(description);
 
-    const task = await Task.findOne({ userId: user._id, name });
+    const task = await Task.findOne({ title }).where(
+      "creator.userId",
+      user._id
+    );
     if (task)
       throw new Error(
         `This task already listed, and it's current status is: ${task.status}`
       );
 
     const newTask = await Task.create({
-      name,
+      creator: {
+        userId: user._id,
+        username: user.username,
+        email: user.email,
+      },
+      title,
       description,
       startDate,
       endDate,
       priority,
       status,
-      userId: user._id,
     });
+
+    if (assignedUserId) {
+      const assignedUserData = User.findById(assignedUserId);
+
+      if (!assignedUserData) {
+        res.statsu(404);
+        throw new Error("User not found");
+      }
+
+      newTask.assignee = {
+        userId: assignedUserId,
+        username: assignedUserData.username,
+        email: assignedUserData.email,
+      };
+    } else {
+      newTask.assignee = {
+        userId: user._id,
+        username: user.username,
+        email: user.email,
+      };
+      await newTask.save();
+    }
+
     res.status(201).json({
       success: true,
       message: "Successfully created.",
@@ -61,15 +104,15 @@ export const updateTask = async (req, res) => {
     const {
       user,
       task,
-      body: { name, description, status },
+      body: { title, description, status, assignedUserId },
     } = req;
 
     await Yup.string()
-      .label("Task name")
+      .label("Task title")
       .required()
       .min(3)
       .max(30)
-      .validate(name);
+      .validate(title);
     await Yup.string()
       .label("Description")
       .required()
@@ -77,16 +120,31 @@ export const updateTask = async (req, res) => {
       .max(300)
       .validate(description);
 
-    const tasksWithSameName = await Task.find({ userId: user._id, name });
-    if (tasksWithSameName.length > 1)
+    if (
+      (await Task.find({ title }).where("creator.userId", user._id)).length > 1
+    )
       throw new Error(
         `This task already listed, and it's current status is: ${task.status}`
       );
 
-    if (name && name !== task.name) await task.$set("name", name);
+    if (title && title !== task.title) await task.$set("title", title);
+
     if (description && description !== task.description)
       await task.$set("description", description);
+
     if (status && status !== task.status) await task.$set("status", status);
+
+    if (assignedUserId) {
+      const assignedUserData = User.findById(assignedUserId);
+
+      if (!assignedUserData) {
+        res.statsu(404);
+        throw new Error("User not found");
+      }
+      task.$set("assignee.userId", assignedUserId);
+      task.$set("assignee.username", assignedUserData.username);
+      task.$set("assignee.email", assignedUserData.email);
+    }
 
     await task.save();
 
@@ -103,7 +161,6 @@ export const updateTask = async (req, res) => {
 export const deleteTask = async (req, res) => {
   try {
     const {
-      task,
       params: { taskId },
     } = req;
 

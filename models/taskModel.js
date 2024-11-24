@@ -4,7 +4,12 @@ import { modelRefType } from "../utils/helpers.js";
 
 const taskSchema = new Schema(
   {
-    name: {
+    creator: {
+      userId: modelRefType("User"),
+      username: String,
+      email: String,
+    },
+    title: {
       type: String,
       required: true,
       minLength: 3,
@@ -16,7 +21,10 @@ const taskSchema = new Schema(
       minLength: 10,
       maxLength: 300,
     },
-    projectId: modelRefType("Project"),
+    project: {
+      projectId: modelRefType("Project"),
+      projectName: String,
+    },
     startDate: {
       type: Date,
       default: Date.now(),
@@ -35,9 +43,13 @@ const taskSchema = new Schema(
       type: String,
       default: TASK_STATUS.NOT_STARTED,
     },
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
+    assignee: {
+      userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+      username: String,
+      email: String,
     },
   },
   {
