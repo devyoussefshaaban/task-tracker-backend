@@ -9,22 +9,17 @@ import GroupMember from "../models/group_member.js";
 export const getMyInvitations = asyncHandler(async (req, res) => {
   try {
     const { user } = req;
-    // TODO: CHECK THE ISSUE WITH $WHERE, NOT WORK
-    // const sentInvitations = await Invitation.find({
-    //   $where: () => this.sender.email === user.email,
-    // });
-    // const recievedInvitations = await Invitation.find({
-    //   $where: () => this.reciever.email === user.email,
-    // });
 
-    // TODO: REMOVE THAT RUBBISH ONCE THE ABOVE ISSUE RESOLVED
-    const sentInvitations = (await Invitation.find()).filter(
-      (invitation) => invitation.sender.email === user.email
+    const sentInvitations = await Invitation.find().where(
+      "sender.email",
+      user.email
     );
 
-    const recievedInvitations = (await Invitation.find()).filter(
-      (invitation) => invitation.reciever.email === user.email
+    const recievedInvitations = await Invitation.find().where(
+      "reciever.email",
+      user.email
     );
+
     res
       .status(200)
       .json({ success: true, data: { sentInvitations, recievedInvitations } });
@@ -62,18 +57,7 @@ export const inviteGroupMember = asyncHandler(async (req, res) => {
       throw new Error("All fields are required, kindly fill them all.");
 
     // TODO: Fix bug of this filter, the recieverEmail is not defined err.
-    // const invitation = await Invitation.findOne({
-    //   $where: function () {
-    //     return this.reciever.email === recieverEmail;
-    //   },
-    // });
-
-    // TODO: Remove this method once the above error resolved.
-    const invitation = (await Invitation.find()).find(
-      (invitation) =>
-        invitation.reciever.email === recieverEmail &&
-        invitation.groupId === groupId
-    );
+    const invitation = await Invitation.findOne().where("groupId", groupId);
 
     if (invitation)
       throw new Error(

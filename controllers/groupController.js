@@ -93,7 +93,12 @@ export const getGroupById = asyncHandler(async (req, res) => {
 
     const projects = await Project.find({ groupId: group._id });
 
-    res.status(200).json({ success: true, data: { group, projects } });
+    const members = await GroupMember.find().where(
+      "groupData.groupId",
+      group._id
+    );
+
+    res.status(200).json({ success: true, data: { group, projects, members } });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
