@@ -21,3 +21,10 @@ export const INVITATION_STATUS = {
   REJECTED: "REJECTED",
   ACCEPTED: "ACCEPTED",
 };
+
+export const CURRENCY = {
+  USD: "USD",
+  EUR: "EUR",
+  INR: "INR",
+  EGP: "EGP",
+};

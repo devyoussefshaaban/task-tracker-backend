@@ -1,6 +1,9 @@
 import Project from "../models/projectModel.js";
 import asyncHandler from "express-async-handler";
 import Yup from "yup";
+import Group from "../models/groupModel.js";
+import Task from "../models/taskModel.js";
+import ProjectMember from "../models/project_member.js";
 
 export const createNewProject = asyncHandler(async (req, res) => {
   try {
@@ -28,14 +31,26 @@ export const createNewProject = asyncHandler(async (req, res) => {
     if (await Project.findOne({ projectName, groupId }))
       throw new Error("Project with same name already exist in the project.");
 
+    const userData = {
+      userId: user._id,
+      username: user.username,
+      email: user.email,
+    };
+
     const newProject = await Project.create({
       projectName,
       description,
       groupId,
-      team: {
-        leaderId: user._id,
-        members: [],
+      leader: userData,
+    });
+
+    await ProjectMember.create({
+      projectData: {
+        projectId: newProject._id,
+        projectName: newProject.projectName,
+        description: newProject.description,
       },
+      userData,
     });
 
     res.status(201).json({
@@ -43,6 +58,37 @@ export const createNewProject = asyncHandler(async (req, res) => {
       message: "New Project Created Successfully.",
       data: newProject,
     });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+export const getProjectInfo = asyncHandler(async (req, res) => {
+  try {
+    const {
+      params: { groupId, projectId },
+    } = req;
+
+    const group = await Group.findById(groupId);
+    if (!group) {
+      res.status(404);
+      throw new Error("Group not found.");
+    }
+
+    const project = await Project.findById(projectId);
+    if (!project) {
+      res.status(404);
+      throw new Error("Project not found.");
+    }
+
+    const members = await ProjectMember.find().where(
+      "projectData.projectId",
+      projectId
+    );
+
+    const tasks = await Task.find().where("project.projectId", projectId);
+
+    res.status(200).json({ success: true, data: { project, members, tasks } });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
