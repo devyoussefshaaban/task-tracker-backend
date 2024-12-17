@@ -1,5 +1,6 @@
 import Task from "../models/taskModel.js";
 import User from "../models/userModel.js";
+import Project from "../models/projectModel.js";
 import Yup from "yup";
 
 export const getMyTasks = async (req, res) => {
@@ -27,6 +28,7 @@ export const createTask = async (req, res) => {
         endDate,
         priority,
         status,
+        projectId,
         assignedUserId,
       },
     } = req;
@@ -53,6 +55,13 @@ export const createTask = async (req, res) => {
         `This task already listed, and it's current status is: ${task.status}`
       );
 
+    const assigneeInfo = assignedUserId
+      ? await User.findById(assignedUserId)
+      : user;
+
+    const projectInfo = projectId ? await Project.findById(projectId) : null;
+    console.log({ projectInfo });
+
     const newTask = await Task.create({
       creator: {
         userId: user._id,
@@ -65,29 +74,18 @@ export const createTask = async (req, res) => {
       endDate,
       priority,
       status,
+      project: projectInfo
+        ? {
+            projectId: projectInfo._id,
+            projectName: projectInfo.projectName,
+          }
+        : null,
+      assignee: {
+        userId: assigneeInfo._id,
+        username: assigneeInfo.username,
+        email: assigneeInfo.email,
+      },
     });
-
-    if (assignedUserId) {
-      const assignedUserData = User.findById(assignedUserId);
-
-      if (!assignedUserData) {
-        res.statsu(404);
-        throw new Error("User not found");
-      }
-
-      newTask.assignee = {
-        userId: assignedUserId,
-        username: assignedUserData.username,
-        email: assignedUserData.email,
-      };
-    } else {
-      newTask.assignee = {
-        userId: user._id,
-        username: user.username,
-        email: user.email,
-      };
-      await newTask.save();
-    }
 
     res.status(201).json({
       success: true,
