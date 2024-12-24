@@ -1,35 +1,48 @@
 import Task from "../models/taskModel.js";
 import User from "../models/userModel.js";
 import Project from "../models/projectModel.js";
+import TaskCategory from "../models/taskCategoryModel.js";
+import asyncHandler from "express-async-handler";
 import Yup from "yup";
+import { TASK_STATUS } from "../utils/constants.js";
 
-export const getMyTasks = async (req, res) => {
+export const getMyTasks = asyncHandler(async (req, res) => {
   try {
     const { user } = req;
-    const tasks = await Task.find().where(
-      "creator.userId",
-      user._id && "assignee.userId",
-      user._id
-    );
-    res.status(200).json({ success: true, data: tasks });
+    // TODO: Return All Tasks Except the UPCOMING
+    const currentTasks = await Task.find().where({
+      "creator._id": user._id,
+      "assignee._id": user._id,
+    });
+    // .getFilter("status", !TASK_STATUS.UPCOMING);
+    // TODO: Filter & get the upcoming tasks handling Based on the date
+    const upcomingTasks = await Task.find().where({
+      "creator._id": user._id,
+      "assignee._id": user._id,
+      status: TASK_STATUS.UPCOMING,
+    });
+    res
+      .status(200)
+      .json({ success: true, data: { currentTasks, upcomingTasks } });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
-};
+});
 
-export const createTask = async (req, res) => {
+export const createTask = asyncHandler(async (req, res) => {
   try {
     const {
       user,
       body: {
         title,
         description,
-        startDate,
-        endDate,
-        priority,
         status,
+        priority,
+        startDateTime,
+        endDateTime,
         projectId,
-        assignedUserId,
+        categoryId,
+        assigneeId,
       },
     } = req;
 
@@ -46,42 +59,47 @@ export const createTask = async (req, res) => {
       .max(300)
       .validate(description);
 
-    const task = await Task.findOne({ title }).where(
-      "creator.userId",
-      user._id
-    );
+    const task = await Task.findOne({ title }).where("creator._id", user._id);
     if (task)
       throw new Error(
         `This task already listed, and it's current status is: ${task.status}`
       );
 
-    const assigneeInfo = assignedUserId
-      ? await User.findById(assignedUserId)
-      : user;
+    const assigneeInfo = assigneeId ? await User.findById(assigneeId) : user;
 
     const projectInfo = projectId ? await Project.findById(projectId) : null;
-    console.log({ projectInfo });
+
+    const categoryInfo = categoryId
+      ? await TaskCategory.findById(categoryId)
+      : null;
 
     const newTask = await Task.create({
-      creator: {
-        userId: user._id,
-        username: user.username,
-        email: user.email,
-      },
       title,
       description,
-      startDate,
-      endDate,
-      priority,
       status,
+      priority,
+      startDateTime,
+      endDateTime,
       project: projectInfo
         ? {
-            projectId: projectInfo._id,
+            _id: projectInfo._id,
             projectName: projectInfo.projectName,
           }
         : null,
+      category: categoryInfo
+        ? {
+            _id: categoryInfo._id,
+            categoryName: categoryInfo.categoryName,
+            description: categoryInfo.description,
+          }
+        : null,
+      creator: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+      },
       assignee: {
-        userId: assigneeInfo._id,
+        _id: assigneeInfo._id,
         username: assigneeInfo.username,
         email: assigneeInfo.email,
       },
@@ -95,14 +113,14 @@ export const createTask = async (req, res) => {
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
-};
+});
 
-export const updateTask = async (req, res) => {
+export const updateTask = asyncHandler(async (req, res) => {
   try {
     const {
       user,
       task,
-      body: { title, description, status, assignedUserId },
+      body: { title, description, status, assigneeId },
     } = req;
 
     await Yup.string()
@@ -132,14 +150,14 @@ export const updateTask = async (req, res) => {
 
     if (status && status !== task.status) await task.$set("status", status);
 
-    if (assignedUserId) {
-      const assignedUserData = User.findById(assignedUserId);
+    if (assigneeId) {
+      const assignedUserData = User.findById(assigneeId);
 
       if (!assignedUserData) {
         res.statsu(404);
         throw new Error("User not found");
       }
-      task.$set("assignee.userId", assignedUserId);
+      task.$set("assignee.userId", assigneeId);
       task.$set("assignee.username", assignedUserData.username);
       task.$set("assignee.email", assignedUserData.email);
     }
@@ -154,7 +172,7 @@ export const updateTask = async (req, res) => {
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
-};
+});
 
 export const deleteTask = async (req, res) => {
   try {
@@ -169,3 +187,19 @@ export const deleteTask = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
+export const getTaskById = asyncHandler(async (req, res) => {
+  try {
+    const {
+      params: { taskId },
+    } = req;
+    const task = await Task.findById(taskId);
+    if (!task) {
+      res.status(404);
+      throw new Error("Task not found.");
+    }
+    res.status(200).json({ success: true, data: task });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});

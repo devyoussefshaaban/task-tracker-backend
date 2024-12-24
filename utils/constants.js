@@ -1,7 +1,11 @@
 export const TASK_STATUS = {
-  NOT_STARTED: "NOT_STARTED",
-  IN_PROGRESS: "IN_PROGRESS",
-  COMPLETED: "COMPLETED",
+  NOT_STARTED: "Not Started",
+  UPCOMING: "Upcoming",
+  IN_PROGRESS: "In Progress",
+  COMPLETED: "Completed",
+  WAITING_REVIEW: "Waiting Review",
+  IN_REVIEW: "In Review",
+  APPROVED: "Approved",
 };
 
 export const USER_ROLE = {

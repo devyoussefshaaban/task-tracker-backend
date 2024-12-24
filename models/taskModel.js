@@ -4,11 +4,6 @@ import { modelRefType } from "../utils/helpers.js";
 
 const taskSchema = new Schema(
   {
-    creator: {
-      userId: modelRefType("User"),
-      username: String,
-      email: String,
-    },
     title: {
       type: String,
       required: true,
@@ -21,33 +16,42 @@ const taskSchema = new Schema(
       minLength: 10,
       maxLength: 300,
     },
-    project: {
-      projectId: modelRefType("Project"),
-      projectName: String,
-    },
-    startDate: {
-      type: Date,
-      default: Date.now(),
-    },
-    // NOTE: END-DATE IS REQUIRED AND SHOULD BE UPDATED IN THIS MODEL
-    endDate: {
-      type: Date,
-      default: Date.now(),
+    status: {
+      type: String,
+      default: TASK_STATUS.UPCOMING,
     },
     priority: {
       type: String,
       required: true,
       default: TASK_PRIORITY.NORMAL,
     },
-    status: {
-      type: String,
-      default: TASK_STATUS.NOT_STARTED,
+    // NOTE: START-DATE IS REQUIRED AND SHOULD BE UPDATED IN THIS MODEL
+    startDateTime: {
+      type: Date,
+      default: Date.now(),
+    },
+    // NOTE: END-DATE IS REQUIRED AND SHOULD BE UPDATED IN THIS MODEL
+    endDateTime: {
+      type: Date,
+      default: Date.now(),
+    },
+    project: {
+      _id: modelRefType("Project"),
+      projectName: String,
+      descrtiption: String,
+    },
+    category: {
+      _id: String,
+      categoryName: String,
+      descrtiption: String,
+    },
+    creator: {
+      _id: modelRefType("User"),
+      username: String,
+      email: String,
     },
     assignee: {
-      userId: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
+      _id: String,
       username: String,
       email: String,
     },
